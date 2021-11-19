@@ -2,30 +2,28 @@ version: '3'
 services:
 
   #PHP Service
-  simplifiquei-php:
+  php:
     build:
       context: .
       dockerfile: Dockerfile
     image: digitalocean.com/php
-    container_name: simplifiquei-php
+    container_name: php
     restart: unless-stopped
     tty: true
     environment:
-      SERVICE_NAME: simplifiquei-php
+      SERVICE_NAME: php
       SERVICE_TAGS: dev
-      PHP_IDE_CONFIG: "serverName=api.simplifiqueii.local"
     working_dir: /srv/www
     volumes:
       - /opt/infra:/srv/infra
       - /opt/logs:/srv/logs
       - /opt:/srv
       - /opt/www:/srv/www:cached
-      - /opt/infra/php/simplifiquei.ini:/usr/local/etc/php/conf.d/simplifiquei.ini
+      - /opt/infra/php/php.ini:/usr/local/etc/php/conf.d/php.ini
     networks:
-      - simplifiquei-network
+      - network
     links:
       - mysql:mysql      
-
   mysql:
     image: mysql:5.7.10
     container_name: mysql
@@ -33,17 +31,15 @@ services:
     tty: true
     ports:
      - "3306:3306"
-    volumes:   
-     - /opt/infra/mysql:/var/lib/mysql
     environment:
         MYSQL_ROOT_PASSWORD: 12345    
     networks:
-     - simplifiquei-network    
+     - network    
 
   #Nginx Service
-  simplifiquei-nginx:
+  nginx:
     image: nginx:alpine
-    container_name: simplifiquei-nginx
+    container_name: nginx
     restart: unless-stopped
     tty: true
     ports:
@@ -56,18 +52,18 @@ services:
       - /tmp:/tmp
       - /opt/infra/nginx/conf.d/:/etc/nginx/conf.d/
     networks:
-      - simplifiquei-network
+      - network
       #Nginx Service
-  simplifiquei-cache:
+  cache:
     image: redis:latest
-    container_name: simplifiquei-cache
+    container_name: cache
     restart: unless-stopped
     tty: true
     ports:
       - "6379:6379"
     networks:
-      - simplifiquei-network
+      - network
 #Docker Networks
 networks:
-  simplifiquei-network:
+  network:
     driver: bridge
